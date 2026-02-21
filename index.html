@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>আল-কোরআন প্রিমিয়াম প্লেয়ার</title>
+    <title>QURAN PLAYER</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#27ae60">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2874/2874810.png">
+    <link rel="apple-touch-icon" href="icon.jpg">
     
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -61,10 +61,14 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
         }
 
+        /* Logo and Header Update */
+        .player-img-container {
+            width: 110px; height: 110px; margin: 0 auto 15px; border-radius: 50%;
+            border: 3px solid var(--accent-color); padding: 5px; background: rgba(39, 174, 96, 0.1);
+        }
         .player-img { 
-            width: 100px; height: 100px; background: linear-gradient(45deg, var(--accent-color), #2ecc71); 
-            margin: 0 auto 15px; border-radius: 50%; display: flex; justify-content: center; 
-            align-items: center; font-size: 45px;
+            width: 100%; height: 100%; border-radius: 50%; 
+            object-fit: cover; display: block;
         }
         
         .progress-area { height: 6px; width: 100%; background: #455a64; border-radius: 50px; cursor: pointer; margin: 20px 0 10px; }
@@ -85,10 +89,16 @@
 
         #contentOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; padding: 60px 20px; text-align: center; }
         
-        /* Download Button Style */
         .download-btn { background: #34495e; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 13px; margin-top: 15px; transition: 0.3s; }
         .download-btn:hover { background: #2c3e50; }
         .download-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Update Alert Style */
+        #update-banner {
+            display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-color); color: white; padding: 12px 25px; border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 1000; cursor: pointer; font-size: 14px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +106,7 @@
     <div class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
 
     <div class="sidebar" id="mySidebar">
-        <h3 style="text-align:center; color:var(--accent-color); margin-bottom:20px;">ইসলামিক লাইব্রেরি</h3>
+        <h3 style="text-align:center; color:var(--accent-color); margin-bottom:20px;">QURAN PLAYER</h3>
         <ul style="list-style:none;">
             <li onclick="showRandom('dua')" style="padding:15px; background:#334155; margin-bottom:10px; border-radius:10px; cursor:pointer;"><i class="fas fa-pray"></i> প্রয়োজনীয় দোয়া</li>
             <li onclick="showRandom('hadith')" style="padding:15px; background:#334155; margin-bottom:10px; border-radius:10px; cursor:pointer;"><i class="fas fa-book"></i> বুখারী শরিফ</li>
@@ -115,7 +125,10 @@
     </div>
 
     <div class="container">
-        <div class="player-img"><i class="fas fa-quran"></i></div>
+        <div class="player-img-container">
+            <img src="icon.jpg" alt="Logo" class="player-img">
+        </div>
+        
         <h2 id="displaySurahName">সুরা ফাতিহা</h2>
         <div class="surah-details">
             <span class="badge" id="surahType">মক্কী</span>
@@ -157,13 +170,25 @@
         </div>
     </div>
 
+    <div id="update-banner" onclick="window.location.reload()">
+        নতুন আপডেট পাওয়া গেছে! রিফ্রেশ করুন।
+    </div>
+
     <script>
-        // PWA Registration: এই অংশটুকু নতুন যুক্ত করা হয়েছে
+        // Service Worker Registration with Update Detection
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker Registered'))
-                    .catch(err => console.log('Service Worker Failed', err));
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW Registered');
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                document.getElementById('update-banner').style.display = 'block';
+                            }
+                        };
+                    };
+                });
             });
         }
 
@@ -179,7 +204,7 @@
         let sleepTimer = null;
 
         const surahInfo = [
-            {n:"ফাতিহা", t:"মক্কী", a:7}, {n:"বাকারা", t:"মাদানী", a:286}, {n:"আল ইমরান", t:"মাদানী", a:200}, {n:"নিসা", t:"মাদানী", a:176}, {n:"মায়িদাহ", t:"মাদানী", a:120}, {n:"আনআম", t:"মক্কী", a:165}, {n:"আরাফ", t:"মক্কী", a:206}, {n:"আনফাল", t:"মাদানী", a:75}, {n:"তাওবাহ", t:"মাদানী", a:129}, {n:"ইউনূস", t:"মক্কী", a:109}, {n:"হূদ", t:"মক্কী", a:123}, {n:"ইউসুফ", t:"মক্কী", a:111}, {n:"রাদ", t:"মাদানী", a:43}, {n:"ইব্রাহিম", t:"মক্কী", a:52}, {n:"হিজর", t:"মক্কী", a:99}, {n:"নাহল", t:"মক্কী", a:128}, {n:"ইসরা", t:"মক্কী", a:111}, {n:"কাহফ", t:"মক্কী", a:110}, {n:"মারইয়াম", t:"মক্কী", a:98}, {n:"তহা", t:"মক্কী", a:135}, {n:"আম্বিয়া", t:"মক্কী", a:112}, {n:"হজ", t:"মাদানী", a:78}, {n:"মুমিনুন", t:"মক্কী", a:118}, {n:"নূর", t:"মাদানী", a:64}, {n:"ফুরকান", t:"মক্কী", a:77}, {n:"শুয়ারা", t:"মক্কী", a:227}, {n:"নামল", t:"মক্কী", a:93}, {n:"কাসাস", t:"মক্কী", a:88}, {n:"আনকাবুত", t:"মক্কী", a:69}, {n:"রূম", t:"মক্কী", a:60}, {n:"লুকমান", t:"মক্কী", a:34}, {n:"সাজদাহ", t:"মক্কী", a:30}, {n:"আহজাব", t:"মাদানী", a:73}, {n:"সাবা", t:"মক্কী", a:54}, {n:"ফাতির", t:"মক্কী", a:45}, {n:"ইয়াসিন", t:"মক্কী", a:83}, {n:"সাফফাত", t:"মক্কী", a:182}, {n:"সোয়াদ", t:"মক্কী", a:88}, {n:"জুমার", t:"মক্কী", a:75}, {n:"গাফির", t:"মক্কী", a:85}, {n:"ফুসসিলাত", t:"মক্কী", a:54}, {n:"শুরা", t:"মক্কী", a:53}, {n:"জুখরুফ", t:"মক্কী", a:89}, {n:"দুখান", t:"মক্কী", a:59}, {n:"জাসিয়াহ", t:"মক্কী", a:37}, {n:"আহকফ", t:"মক্কী", a:35}, {n:"মুহাম্মদ", t:"মাদানী", a:38}, {n:"ফাতহ", t:"মাদানী", a:29}, {n:"হুজুরাত", t:"মাদানী", a:18}, {n:"কফ", t:"মক্কী", a:45}, {n:"যারিয়াত", t:"মক্কী", a:60}, {n:"তুর", t:"মক্কী", a:49}, {n:"নাজম", t:"মক্কী", a:62}, {n:"কামার", t:"মক্কী", a:55}, {n:"রাহমান", t:"মাদানী", a:78}, {n:"ওয়াকিআহ", t:"মক্কী", a:96}, {n:"হাদিদ", t:"মাদানী", a:29}, {n:"মুজাদালাহ", t:"মাদানী", a:22}, {n:"হাশর", t:"মাদানী", a:24}, {n:"মুমতাহিনাহ", t:"মাদানী", a:13}, {n:"সাফ", t:"মাদানী", a:14}, {n:"জুমুআহ", t:"মাদানী", a:11}, {n:"মুনাফিকুন", t:"মাদানী", a:11}, {n:"তাগাবুন", t:"মাদানী", a:18}, {n:"তালাক", t:"মাদানী", a:12}, {n:"তাহরিম", t:"মাদানী", a:12}, {n:"মুলক", t:"মক্কী", a:30}, {n:"কলম", t:"মক্কী", a:52}, {n:"হাক্কাহ", t:"মক্কী", a:52}, {n:"মাআরিজ", t:"মক্কী", a:44}, {n:"নূহ", t:"মক্কী", a:28}, {n:"জ্বিন", t:"মক্কী", a:28}, {n:"মুযযামমিল", t:"মক্কী", a:20}, {n:"মুদ্দাসসির", t:"মক্কী", a:56}, {n:"কিয়াহমাহ", t:"মক্কী", a:40}, {n:"ইনসান", t:"মাদানী", a:31}, {n:"মুরসালাত", t:"মক্কী", a:50}, {n:"নাবা", t:"মক্কী", a:40}, {n:"নাযিয়াত", t:"মক্কী", a:46}, {n:"আবাসা", t:"মক্কী", a:42}, {n:"তাকভির", t:"মক্কী", a:29}, {n:"ইনফিতার", t:"মক্কী", a:19}, {n:"মুতাফফিফিন", t:"মক্কী", a:36}, {n:"ইনশিকাক", t:"মক্কী", a:25}, {n:"বুরুজ", t:"মক্কী", a:22}, {n:"তারিক", t:"মক্কী", a:17}, {n:"আলা", t:"মক্কী", a:19}, {n:"গাশিয়াহ", t:"মক্কী", a:26}, {n:"ফজর", t:"মক্কী", a:30}, {n:"বালাদ", t:"মক্কী", a:20}, {n:"শামস", t:"মক্কী", a:15}, {n:"লাইল", t:"মক্কী", a:21}, {n:"দুহা", t:"মক্কী", a:11}, {n:"শারহ", t:"মক্কী", a:8}, {n:"তিন", t:"মক্কী", a:8}, {n:"আলাক", t:"মক্কী", a:19}, {n:"কদর", t:"মক্কী", a:5}, {n:"বাইয়িনাহ", t:"মাদানী", a:8}, {n:"যিলযাল", t:"মাদানী", a:8}, {n:"আদিয়াত", t:"মক্কী", a:11}, {n:"কারিয়াহ", t:"মক্কী", a:11}, {n:"তাকাসুর", t:"মক্কী", a:8}, {n:"আসর", t:"মক্কী", a:3}, {n:"হুমাযাহ", t:"মক্কী", a:9}, {n:"ফিল", t:"মক্কী", a:5}, {n:"কুরাইশ", t:"মক্কী", a:4}, {n:"মাউন", t:"মক্কী", a:7}, {n:"কাওসার", t:"মক্কী", a:3}, {n:"কাফিরুন", t:"মক্কী", a:6}, {n:"নাসর", t:"মাদানী", a:3}, {n:"লাহাব", t:"মক্কী", a:5}, {n:"ইখলাস", t:"মক্কী", a:4}, {n:"ফালাক", t:"মক্কী", a:5}, {n:"নাস", t:"মক্কী", a:6}
+            {n:"ফাতিহা", t:"মক্কী", a:7}, {n:"বাকারা", t:"মাদানী", a:286}, {n:"আল ইমরান", t:"মাদানী", a:200}, {n:"নিসা", t:"মাদানী", a:176}, {n:"মায়িদাহ", t:"মাদানী", a:120}, {n:"আনআম", t:"মক্কী", a:165}, {n:"আরাফ", t:"মক্কী", a:206}, {n:"আনফাল", t:"মাদানী", a:75}, {n:"তাওবাহ", t:"মাদানী", a:129}, {n:"ইউনূস", t:"মক্কী", a:109}, {n:"হূদ", t:"মক্কী", a:123}, {n:"ইউসুফ", t:"মক্কী", a:111}, {n:"রাদ", t:"মাদানী", a:43}, {n:"ইব্রাহিম", t:"মক্কী", a:52}, {n:"হিজর", t:"মক্কী", a:99}, {n:"নাহল", t:"মক্কী", a:128}, {n:"ইসরা", t:"মক্কী", a:111}, {n:"কাহফ", t:"মক্কী", a:110}, {n:"মারইয়াম", t:"মক্কী", a:98}, {n:"তহা", t:"মক্কী", a:135}, {n:"আম্বিয়া", t:"মক্কী", a:112}, {n:"হজ", t:"মাদানী", a:78}, {n:"মুমিনুন", t:"মক্কী", a:118}, {n:"নূর", t:"মাদানী", a:64}, {n:"ফুরকান", t:"মক্কী", a:77}, {n:"শুয়ারা", t:"মক্কী", a:227}, {n:"নামল", t:"মক্কী", a:93}, {n:"কাসাস", t:"মক্কী", a:88}, {n:"আনকাবুত", t:"মক্কী", a:69}, {n:"রূম", t:"মক্কী", a:60}, {n:"লুকমান", t:"মক্কী", a:34}, {n:"সাজদাহ", t:"মক্কী", a:30}, {n:"আহজাব", t:"মাদানী", a:73}, {n:"সাবা", t:"মক্কী", a:54}, {n:"ফাতির", t:"মক্কী", a:45}, {n:"ইয়াসিন", t:"মক্কী", a:83}, {n:"সাফফাত", t:"মক্কী", a:182}, {n:"সোয়াদ", t:"মক্কী", a:88}, {n:"জুমার", t:"মক্কী", a:75}, {n:"গাফির", t:"মক্কী", a:85}, {n:"ফুসসিলাত", t:"মক্কী", a:54}, {n:"শুরা", t:"মক্কী", a:53}, {n:"জুখরুফ", t:"মক্কী", a:89}, {n:"দুখান", t:"মক্কী", a:59}, {n:"জাসিয়াহ", t:"মক্কী", a:37}, {n:"আহকফ", t:"মক্কী", a:35}, {n:"মুহাম্মদ", t:"মাদানী", a:38}, {n:"ফাতহ", t:"মাদানী", a:29}, {n:"হুজুরাত", t:"মাদানী", a:18}, {n:"কফ", t:"মক্কী", a:45}, {n:"যারিয়াত", t:"mক্কী", a:60}, {n:"তুর", t:"মক্কী", a:49}, {n:"নাজম", t:"মক্কী", a:62}, {n:"কামার", t:"মক্কী", a:55}, {n:"রাহমান", t:"মাদানী", a:78}, {n:"ওয়াকিআহ", t:"মক্কী", a:96}, {n:"হাদিদ", t:"মাদানী", a:29}, {n:"মুজাদালাহ", t:"মাদানী", a:22}, {n:"হাশর", t:"মাদানী", a:24}, {n:"মুমতাহিনাহ", t:"মাদানী", a:13}, {n:"সাফ", t:"মাদানী", a:14}, {n:"জুমুআহ", t:"মাদানী", a:11}, {n:"মুনাফিকুন", t:"মাদানী", a:11}, {n:"তাগাবুন", t:"মাদানী", a:18}, {n:"তালাক", t:"মাদানী", a:12}, {n:"তাহরিম", t:"মাদানী", a:12}, {n:"মুলক", t:"মক্কী", a:30}, {n:"কলম", t:"মক্কী", a:52}, {n:"হাক্কাহ", t:"মক্কী", a:52}, {n:"মাআরিজ", t:"মক্কী", a:44}, {n:"নূহ", t:"মক্কী", a:28}, {n:"জ্বিন", t:"মক্কী", a:28}, {n:"মুযযামমিল", t:"মক্কী", a:20}, {n:"মুদ্দাসসির", t:"মক্কী", a:56}, {n:"কিয়াহমাহ", t:"মক্কী", a:40}, {n:"ইনসান", t:"মাদানী", a:31}, {n:"মুরসালাত", t:"মক্কী", a:50}, {n:"নাবা", t:"মক্কী", a:40}, {n:"নাযিয়াত", t:"মক্কী", a:46}, {n:"আবাসা", t:"মক্কী", a:42}, {n:"তাকভির", t:"মক্কী", a:29}, {n:"ইনফিতার", t:"মক্কী", a:19}, {n:"মুতাফফিফিন", t:"মক্কী", a:36}, {n:"ইনশিকাক", t:"মক্কী", a:25}, {n:"বুরুজ", t:"মক্কী", a:22}, {n:"তারিক", t:"মক্কী", a:17}, {n:"আলা", t:"মক্কী", a:19}, {n:"গাশিয়াহ", t:"মক্কী", a:26}, {n:"ফজর", t:"মক্কী", a:30}, {n:"বালাদ", t:"মক্কী", a:20}, {n:"শামস", t:"মক্কী", a:15}, {n:"লাইল", t:"মক্কী", a:21}, {n:"দুহা", t:"মক্কী", a:11}, {n:"শারহ", t:"মক্কী", a:8}, {n:"তিন", t:"মক্কী", a:8}, {n:"আলাক", t:"মক্কী", a:19}, {n:"কদর", t:"মক্কী", a:5}, {n:"বাইয়িনাহ", t:"মাদানী", a:8}, {n:"যিলযাল", t:"মাদানী", a:8}, {n:"আদিয়াত", t:"মক্কী", a:11}, {n:"কারিয়াহ", t:"মক্কী", a:11}, {n:"তাকাসুর", t:"মক্কী", a:8}, {n:"আসর", t:"মক্কী", a:3}, {n:"হুমাযাহ", t:"মক্কী", a:9}, {n:"ফিল", t:"মক্কী", a:5}, {n:"কুরাইশ", t:"মক্কী", a:4}, {n:"মাউন", t:"মক্কী", a:7}, {n:"কাওসার", t:"মক্কী", a:3}, {n:"কাফিরুন", t:"মক্কী", a:6}, {n:"নাসর", t:"মাদানী", a:3}, {n:"লাহাব", t:"মক্কী", a:5}, {n:"ইখলাস", t:"মক্কী", a:4}, {n:"ফালাক", t:"মক্কী", a:5}, {n:"নাস", t:"মক্কী", a:6}
         ];
 
         const hadithData = ["রাসূলুল্লাহ (সাঃ) বলেছেনঃ 'নিশ্চয়ই সকল আমল নিয়তের ওপর নির্ভরশীল।' (বুখারী)", "রাসূলুল্লাহ (সাঃ) বলেছেনঃ 'পবিত্রতা ঈমানের অর্ধেক।' (মুসলিম)", "রাসূলুল্লাহ (সাঃ) বলেছেনঃ 'তোমাদের মধ্যে সেই উত্তম যে কুরআন শিখে এবং শেখায়।' (বুখারী)"];
