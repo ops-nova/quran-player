@@ -1,6 +1,6 @@
 {
-  "name": "QURAN LIBRARY",
-  "short_name": "QURAN LIBRARY",
+  "name": "QURAN PLAYER",
+  "short_name": "QURAN PLAYER",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
