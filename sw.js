@@ -1,46 +1,50 @@
-const CACHE_NAME = 'quran-player-v3'; // আপনি যখনই কোডে বড় কোনো পরিবর্তন করবেন, এই v3 কে v4 বা v5 করে দেবেন।
+const CACHE_NAME = 'quran-player-v2'; // আগের ভার্সন থেকে এক বাড়িয়ে দিন (যেমন v4 থাকলে v5)
+
+// যে ফাইলগুলো অফলাইনে দেখাবে
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.jpg'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.jpg'
 ];
 
-// ১. ফাইলগুলো ক্যাশ (Save) করা
+// ১. ফাইলগুলো ক্যাশ করা
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Caching files...');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting()) // নতুন আপডেট থাকলে সাথে সাথে এক্টিভেট করবে
+      .then(() => self.skipWaiting())
   );
 });
 
-// ২. পুরনো বা ফালতু ক্যাশ ডিলিট করা (যাতে স্টোরেজ জ্যাম না হয়)
+// ২. পুরনো ক্যাশ মুছে ফেলা
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim()) // সব ওপেন থাকা পেজকে নতুন আপডেটে নিয়ে যাবে
+    }).then(() => self.clients.claim())
   );
 });
 
-// ৩. ইন্টারনেট না থাকলে ক্যাশ থেকে ফাইল দেখানো (Offline Support)
+// ৩. অফলাইন সাপোর্ট (নেটওয়ার্ক না থাকলে ক্যাশ থেকে আনা)
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // ক্যাশ করা ফাইল থাকলে সেটি দেবে, না থাকলে ইন্টারনেট থেকে আনবে
-        return response || fetch(event.request);
+        // যদি ক্যাশে ফাইল থাকে তবে সেটি দাও, নাহলে নেট থেকে আনো
+        return response || fetch(event.request).catch(() => {
+          // যদি নেটও না থাকে এবং ফাইলটিও ক্যাশে না থাকে (যেমন অডিও ফাইল)
+          return caches.match('./index.html');
+        });
       })
   );
 });
