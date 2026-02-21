@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quran-player-v2'; // আপডেট করলে শুধু এটি বদলাবেন
+const CACHE_NAME = 'quran-player-v3'; // আপডেট করলে শুধু এটি বদলাবেন
 const OFFLINE_AUDIO_CACHE = 'quran-offline-cache'; // এটি কখনোই ডিলিট হবে না
 
 const urlsToCache = [
