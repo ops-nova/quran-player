@@ -1,6 +1,6 @@
 {
-  "name": "আল-কোরআন লাইব্রেরি",
-  "short_name": "Quran App",
+  "name": "QURAN LIBRARY",
+  "short_name": "QURAN LIBRARY",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -9,7 +9,8 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2874/2874810.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
