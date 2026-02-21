@@ -1,5 +1,5 @@
-const CACHE_NAME = 'quran-player-v3'; // আপডেট করলে শুধু এটি বদলাবেন
-const OFFLINE_AUDIO_CACHE = 'quran-offline-cache'; // এটি কখনোই ডিলিট হবে না
+const CACHE_NAME = 'quran-player-v1'; // যখনই ইন্ডেক্স ফাইলে বড় বদল করবেন, এটি v11, v12 করবেন।
+const OFFLINE_AUDIO_CACHE = 'quran-offline-cache'; // এটি কখনোই ডিলিট হবে না।
 
 const urlsToCache = [
   './',
@@ -8,7 +8,7 @@ const urlsToCache = [
   './icon.jpg'
 ];
 
-// ১. ফাইলগুলো ক্যাশ করা
+// ইনস্টল ইভেন্ট
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -17,13 +17,13 @@ self.addEventListener('install', event => {
   );
 });
 
-// ২. পুরনো ক্যাশ মুছে ফেলা কিন্তু অডিও ক্যাশ রাখা
+// এক্টিভেট ইভেন্ট - পুরনো ক্যাশ মোছা কিন্তু সুরা ক্যাশ রাখা
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // যদি ক্যাশটি বর্তমান ভার্সন না হয় এবং এটি অডিও ক্যাশও না হয়, তবেই ডিলিট করো
+          // যদি ক্যাশটি বর্তমান ভার্সন না হয় এবং এটি সুরার ক্যাশও না হয়, তবেই ডিলিট করো
           if (cacheName !== CACHE_NAME && cacheName !== OFFLINE_AUDIO_CACHE) {
             console.log('Deleting old app cache:', cacheName);
             return caches.delete(cacheName);
@@ -34,16 +34,13 @@ self.addEventListener('activate', event => {
   );
 });
 
-// ৩. অফলাইন সাপোর্ট
+// ফেচ ইভেন্ট - অফলাইন সাপোর্ট
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // প্রথমে ক্যাশে খোঁজো (অ্যাপ ফাইল বা অডিও ফাইল)
-        if (response) return response;
-        
-        // না থাকলে নেট থেকে আনো
-        return fetch(event.request);
+        // যদি ক্যাশে (অ্যাপ বা সুরা) থাকে তবে দাও, নাহলে নেট থেকে আনো
+        return response || fetch(event.request);
       })
   );
 });
